@@ -23,7 +23,7 @@ class PasswordResetController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(['error'=>true,'messages'=>$validator->errors()], 422);
         }
 
         $code = rand(1000, 9999);
@@ -39,7 +39,7 @@ class PasswordResetController extends Controller
 //                ->subject('Password Reset Code');
 //        });
 
-        return response()->json(['error'=>false,'message' => 'Reset code sent to your email.','code'=>$code,'email'=>$request->email], 200);
+        return response()->json(['error' => false, 'message' => 'Reset code sent to your email.', 'code' => $code, 'email' => $request->email], 200);
     }
 
     // Reset password
@@ -52,7 +52,7 @@ class PasswordResetController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(['error'=>true,'messages'=>$validator->errors()], 422);
         }
 
         $passwordReset = DB::table('password_resets')
@@ -61,12 +61,12 @@ class PasswordResetController extends Controller
             ->first();
 
         if (!$passwordReset) {
-            return response()->json(['message' => 'Invalid reset code.'], 400);
+            return response()->json(['error'=>true,'message' => 'Invalid reset code.'], 400);
         }
 
         // Check if the reset code is expired (valid for 1 hour)
         if (Carbon::parse($passwordReset->created_at)->addHour()->isPast()) {
-            return response()->json(['message' => 'Reset code has expired.'], 400);
+            return response()->json(['error'=>true,'message' => 'Reset code has expired.'], 400);
         }
 
         $user = User::where('email', $request->email)->first();
@@ -76,6 +76,6 @@ class PasswordResetController extends Controller
         // Delete the reset token
         DB::table('password_resets')->where('email', $request->email)->delete();
 
-        return response()->json(['error'=>false,'message' => 'Password reset successfully.'], 200);
+        return response()->json(['error' => false, 'message' => 'Password reset successfully.'], 200);
     }
 }
