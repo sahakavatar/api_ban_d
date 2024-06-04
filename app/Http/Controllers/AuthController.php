@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SendCodeRequest;
+use App\Http\Requests\VerifyCodeRequest;
+use App\Models\VerificationCode;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Services\TwilioService;
@@ -96,5 +99,41 @@ class AuthController extends Controller
             'token' => $token,
             'error' => false
         ]);
+    }
+
+    public function sendCode(SendCodeRequest $request)
+    {
+        $code = rand(1000, 9999);
+        VerificationCode::create([
+            'phone_number' => $request->phone,
+            'code' => $code,
+        ]);
+        try {
+            return response()->json(['code' => $code]);
+            //  $this->twilio->sendSms($request->phone_number, "Your verification code is: $code");
+        } catch (\Exception $exception) {
+            return response()->json(['error' => $exception->getMessage()], 422);
+        }
+    }
+
+    public function verifyCode(VerifyCodeRequest $request)
+    {
+        $verificationCode = VerificationCode::where('phone_number', $request->phone_number)
+            ->where('code', $request->code)
+            ->first();
+
+        if (!$verificationCode) {
+            return response()->json(['error' => 'Invalid code'], 401);
+        }
+
+        // Optionally, delete the verification code after successful verification
+        $verificationCode->delete();
+
+        // Authenticate the user
+//        $user = User::firstOrCreate(['phone' => $request->phone_number]);
+//        $token = $user->createToken('authToken')->plainTextToken;
+
+        return response()->json(['error' => false, 'message' => 'Phone number is valid'], 200);
+
     }
 }
