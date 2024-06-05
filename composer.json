@@ -8,7 +8,9 @@
         "php": "^8.2",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
+        "laravel/socialite": "^5.14",
         "laravel/tinker": "^2.9",
+        "socialiteproviders/amazon": "^4.1",
         "twilio/sdk": "^8.1"
     },
     "require-dev": {

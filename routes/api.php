@@ -25,4 +25,6 @@ Route::group(['prefix' => 'v1'], function () {
 
     // Route to login and get an authentication token
     Route::post('/sanctum/token', [AuthController::class, 'login']);
+    Route::post('/auth/google/login', [\App\Http\Controllers\Auth\GoogleController::class, 'login']);
+    Route::post('/auth/amazon/login', [\App\Http\Controllers\Auth\AmazonController::class, 'login']);
 });
