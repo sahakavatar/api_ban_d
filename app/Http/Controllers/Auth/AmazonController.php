@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SocialLoginRequest;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -17,7 +18,7 @@ class AmazonController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function redirectToProvider()
+    public function redirectToProvider():RedirectResponse
     {
         return Socialite::driver('amazon')->redirect();
     }
@@ -27,14 +28,14 @@ class AmazonController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function handleProviderCallback()
+    public function handleProviderCallback(): RedirectResponse
     {
         try {
             $amazonUser = Socialite::driver('amazon')->user();
             $user = User::where('email', $amazonUser->email)->first();
 
             if ($user) {
-                Auth::login($user);
+                $token = $user->createToken('app')->plainTextToken;
             } else {
                 $newUser = User::create([
                     'name' => $amazonUser->name,
@@ -46,9 +47,9 @@ class AmazonController extends Controller
                 Auth::login($newUser);
             }
 
-            return redirect()->intended('/home');
-        } catch (\Exception $e) {
-            return redirect('auth/amazon');
+            return redirect()->to(env('APP_FRONT_URL') . '=' . $token);
+        } catch (Exception $e) {
+            return redirect('auth/google');
         }
     }
 

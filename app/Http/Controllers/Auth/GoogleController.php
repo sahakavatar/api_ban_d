@@ -7,7 +7,6 @@ use App\Http\Requests\SocialLoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -21,7 +20,7 @@ class GoogleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function redirectToGoogle():Response|RedirectResponse
+    public function redirectToGoogle(): Response|RedirectResponse
     {
         return Socialite::driver('google')->redirect();
     }
@@ -31,7 +30,7 @@ class GoogleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function handleGoogleCallback(Request $request)
+    public function handleGoogleCallback(Request $request): Response|RedirectResponse
     {
         Socialite::driver('google');
         try {
@@ -39,7 +38,7 @@ class GoogleController extends Controller
             $user = User::where('email', $googleUser->email)->first();
 
             if ($user) {
-                $token = $user->createToken('app')->plainTextToken;
+                $token = $user->createToken(env('APP_FRONT_NAME'))->plainTextToken;
             } else {
                 $newUser = User::create([
                     'name' => $googleUser->name,
@@ -51,7 +50,7 @@ class GoogleController extends Controller
                 $token = $newUser->createToken('app')->plainTextToken;
             }
 
-            return redirect()->to('http://localhost:8081/auth/login?token=' . $token);
+            return redirect()->to(env('APP_FRONT_URL') . '=' . $token);
         } catch (Exception $e) {
             return redirect('auth/google');
         }
