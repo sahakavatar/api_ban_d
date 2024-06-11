@@ -24,7 +24,7 @@ class SocialLoginRequest extends FormRequest
         return [
             'drive' => 'required|in:amazon,google',
             'device_name' => 'required',
-            'access_token' => 'required|string',
+            'code' => 'required|string',
         ];
     }
 }

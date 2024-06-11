@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SocialLoginRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -18,7 +21,7 @@ class GoogleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function redirectToGoogle()
+    public function redirectToGoogle():Response|RedirectResponse
     {
         return Socialite::driver('google')->redirect();
     }
@@ -28,16 +31,15 @@ class GoogleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function handleGoogleCallback()
+    public function handleGoogleCallback(Request $request)
     {
         Socialite::driver('google');
         try {
             $googleUser = Socialite::driver('google')->user();
-            dd($googleUser->token);
             $user = User::where('email', $googleUser->email)->first();
 
             if ($user) {
-                Auth::login($user);
+                $token = $user->createToken('app')->plainTextToken;
             } else {
                 $newUser = User::create([
                     'name' => $googleUser->name,
@@ -46,10 +48,10 @@ class GoogleController extends Controller
                     'password' => Hash::make(uniqid()) // Generate a random password for this example
                 ]);
 
-                Auth::login($newUser);
+                $token = $newUser->createToken('app')->plainTextToken;
             }
 
-            return redirect()->intended('/home');
+            return redirect()->to('http://localhost:8081/auth/login?token=' . $token);
         } catch (Exception $e) {
             return redirect('auth/google');
         }
