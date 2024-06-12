@@ -38,7 +38,7 @@ class AuthController extends Controller
         // Validate the incoming request data
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string|confirmed',
+            'password' => 'required|string',
             'device_name' => 'required|string',
         ]);
 
