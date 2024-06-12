@@ -30,7 +30,7 @@ class GoogleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function handleGoogleCallback(Request $request): Response|RedirectResponse
+    public function handleGoogleCallback(Request $request)
     {
         Socialite::driver('google');
         try {
@@ -47,12 +47,13 @@ class GoogleController extends Controller
                     'password' => Hash::make(uniqid()) // Generate a random password for this example
                 ]);
 
-                $token = $newUser->createToken('app')->plainTextToken;
+                $token = $newUser->createToken(env('APP_FRONT_NAME'))->plainTextToken;
             }
 
-            return redirect()->to(env('APP_FRONT_URL') . '=' . $token);
-        } catch (Exception $e) {
-            return redirect('auth/google');
+            return redirect()->to(env('APP_FRONT_URL') . '/auth?token=' . $token);
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+            return redirect('auth/google'. $e->getMessage());
         }
     }
 

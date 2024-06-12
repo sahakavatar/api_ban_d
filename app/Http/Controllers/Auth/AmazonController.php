@@ -47,8 +47,9 @@ class AmazonController extends Controller
                 Auth::login($newUser);
             }
 
-            return redirect()->to(env('APP_FRONT_URL') . '=' . $token);
-        } catch (Exception $e) {
+            return redirect()->to(env('APP_FRONT_URL') . '/auth?token=' . $token);
+        } catch (\Exception $e) {
+            dd($e->getMessage());
             return redirect('auth/google');
         }
     }
